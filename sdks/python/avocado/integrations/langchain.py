@@ -22,6 +22,15 @@ from typing import Any, Optional
 from avocado.client import AvocadoDB
 from avocado.manager import get_manager
 
+# Import LangChain middleware base class
+try:
+    from langchain.agents.middleware import AgentMiddleware
+except ImportError:
+    # Fallback if langchain is not installed
+    class AgentMiddleware:
+        """Fallback middleware base class."""
+        pass
+
 
 def avocado_compile_context(
     query: str,
@@ -156,7 +165,7 @@ def avocado_compile_context(
 
 
 # Middleware for blocking read tools after AvocadoDB queries
-class AvocadoDBMiddleware:
+class AvocadoDBMiddleware(AgentMiddleware):
     """LangChain middleware that enforces AvocadoDB-only execution for codebase queries.
 
     When avocado_compile_context is called, blocks these tools:
@@ -179,6 +188,7 @@ class AvocadoDBMiddleware:
 
     def __init__(self):
         """Initialize middleware."""
+        super().__init__()
         # Tools to block when avocado_compile_context is active
         self.blocked_tools = {"read_file", "grep", "ls", "glob"}
 

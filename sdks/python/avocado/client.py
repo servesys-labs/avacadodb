@@ -154,7 +154,10 @@ class AvocadoDB:
             }
         )
         response.raise_for_status()
-        return WorkingSet(response.json())
+        data = response.json()
+        # Extract working_set from API response (API returns {"working_set": {...}})
+        working_set_data = data.get("working_set", data)
+        return WorkingSet(working_set_data)
 
     def ingest(self, path: str, content: Optional[str] = None) -> Dict[str, Any]:
         """Ingest a document into the database.
